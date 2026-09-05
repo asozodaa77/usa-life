@@ -1,6 +1,9 @@
+// ==========================================
+// 🇺🇸 USA LIFE — MAIN JAVASCRIPT
+// ==========================================
+
 const searchInput = document.getElementById("cityInput");
 const searchButton = document.getElementById("searchButton");
-
 const searchResult = document.getElementById("searchResult");
 const suggestions = document.getElementById("suggestions");
 
@@ -8,13 +11,129 @@ const exploreButton = document.getElementById("exploreButton");
 const matchButton = document.getElementById("matchButton");
 
 
-// ======================================
-// USA LIFE
-// Dynamic City Explorer
-// ======================================
+// ==========================================
+// CITY DATA
+// ==========================================
+
+const cityDatabase = {
+
+    "New York": {
+        state: "New York",
+        weather: "cool",
+        size: "large",
+        budget: "high",
+        goal: ["job", "life", "study"],
+        universities: [
+            "Columbia University",
+            "New York University",
+            "City College of New York"
+        ],
+        jobs: [
+            "Finance",
+            "Technology",
+            "Media",
+            "Healthcare"
+        ]
+    },
+
+    "Los Angeles": {
+        state: "California",
+        weather: "warm",
+        size: "large",
+        budget: "high",
+        goal: ["job", "life"],
+        universities: [
+            "UCLA",
+            "USC",
+            "California State University, Los Angeles"
+        ],
+        jobs: [
+            "Entertainment",
+            "Technology",
+            "Media",
+            "Healthcare"
+        ]
+    },
+
+    "Miami": {
+        state: "Florida",
+        weather: "warm",
+        size: "large",
+        budget: "medium",
+        goal: ["life", "job", "study"],
+        universities: [
+            "University of Miami",
+            "Florida International University",
+            "Miami Dade College"
+        ],
+        jobs: [
+            "Tourism",
+            "Hospitality",
+            "Finance",
+            "Healthcare"
+        ]
+    },
+
+    "Austin": {
+        state: "Texas",
+        weather: "warm",
+        size: "medium",
+        budget: "medium",
+        goal: ["job", "study"],
+        universities: [
+            "University of Texas at Austin",
+            "St. Edward's University"
+        ],
+        jobs: [
+            "Technology",
+            "Software",
+            "Business",
+            "Healthcare"
+        ]
+    },
+
+    "Seattle": {
+        state: "Washington",
+        weather: "cool",
+        size: "large",
+        budget: "high",
+        goal: ["job", "study"],
+        universities: [
+            "University of Washington",
+            "Seattle University"
+        ],
+        jobs: [
+            "Technology",
+            "Software",
+            "Engineering",
+            "Healthcare"
+        ]
+    },
+
+    "Houston": {
+        state: "Texas",
+        weather: "warm",
+        size: "large",
+        budget: "medium",
+        goal: ["job", "life", "study"],
+        universities: [
+            "University of Houston",
+            "Rice University"
+        ],
+        jobs: [
+            "Energy",
+            "Healthcare",
+            "Technology",
+            "Engineering"
+        ]
+    }
+
+};
 
 
-// SEARCH CITY
+// ==========================================
+// 🔍 CITY SEARCH
+// ==========================================
 
 async function searchCity(cityName = null) {
 
@@ -32,67 +151,65 @@ async function searchCity(cityName = null) {
 
 
     searchButton.disabled = true;
-
     searchButton.textContent = "Ҷустуҷӯ...";
-
 
     showLoading();
 
 
     try {
 
-        // --------------------------------
-        // 1. Find USA city
-        // --------------------------------
+        // ----------------------------------
+        // GEOCODING
+        // ----------------------------------
 
         const geoURL =
             `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(value)}&count=10&language=en&format=json&countryCode=US`;
 
-        const geoResponse = await fetch(geoURL);
+        const response =
+            await fetch(geoURL);
 
-        if (!geoResponse.ok) {
+        if (!response.ok) {
             throw new Error("Geocoding error");
         }
 
-        const geoData = await geoResponse.json();
+        const data =
+            await response.json();
 
 
         if (
-            !geoData.results ||
-            geoData.results.length === 0
+            !data.results ||
+            data.results.length === 0
         ) {
 
             showError(`
-                ❌ Шаҳри "<strong>${escapeHTML(value)}</strong>" ёфт нашуд.
-                <br>
-                <small>
+                ❌ Шаҳри
+                <strong>${escapeHTML(value)}</strong>
+                ёфт нашуд.
+                <br><br>
                 Номи шаҳри ИМА-ро бо забони англисӣ навис.
-                </small>
             `);
 
             return;
         }
 
 
-        // Find best populated place
-
         const city =
-            geoData.results.find(
+            data.results.find(
                 place =>
                     place.country_code === "US" &&
                     place.feature_code &&
                     place.feature_code.includes("PPL")
             ) ||
-            geoData.results.find(
+            data.results.find(
                 place =>
                     place.country_code === "US"
             ) ||
-            geoData.results[0];
+            data.results[0];
 
 
-        // --------------------------------
-        // 2. Weather
-        // --------------------------------
+        // ----------------------------------
+        // WEATHER
+        // ----------------------------------
 
         const weatherURL =
             `https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
@@ -104,22 +221,18 @@ async function searchCity(cityName = null) {
             await weatherResponse.json();
 
 
-        // --------------------------------
-        // 3. Wikipedia image
-        // --------------------------------
+        // ----------------------------------
+        // WIKIPEDIA
+        // ----------------------------------
 
-        const wikiData =
+        const wiki =
             await getWikipedia(city.name);
 
-
-        // --------------------------------
-        // 4. Show city
-        // --------------------------------
 
         displayCity(
             city,
             weatherData,
-            wikiData
+            wiki
         );
 
 
@@ -128,36 +241,34 @@ async function searchCity(cityName = null) {
         console.error(error);
 
         showError(`
-            ❌ Ҳангоми гирифтани маълумоти шаҳр мушкил пайдо шуд.
-            <br>
-            <small>
+            ❌ Маълумоти шаҳр гирифта нашуд.
+            <br><br>
             Internet connection-ро санҷ ва дубора кӯшиш кун.
-            </small>
         `);
 
     } finally {
 
         searchButton.disabled = false;
-
         searchButton.textContent = "Ҷустуҷӯ";
+
     }
+
 }
 
 
-
-// ======================================
-// WIKIPEDIA IMAGE
-// ======================================
+// ==========================================
+// 📸 WIKIPEDIA
+// ==========================================
 
 async function getWikipedia(cityName) {
 
     try {
 
-        const searchURL =
+        const url =
             `https://en.wikipedia.org/w/rest.php/v1/search/page?q=${encodeURIComponent(cityName)}&limit=5`;
 
         const response =
-            await fetch(searchURL);
+            await fetch(url);
 
         if (!response.ok) {
             return null;
@@ -174,8 +285,6 @@ async function getWikipedia(cityName) {
             return null;
         }
 
-
-        // Prefer city-related result
 
         const page =
             data.pages.find(
@@ -226,28 +335,24 @@ async function getWikipedia(cityName) {
         };
 
 
-    } catch (error) {
-
-        console.log(
-            "Wikipedia image unavailable"
-        );
+    } catch {
 
         return null;
+
     }
+
 }
 
 
-
-// ======================================
-// DISPLAY CITY
-// ======================================
+// ==========================================
+// 🏙️ DISPLAY CITY
+// ==========================================
 
 function displayCity(
     city,
     weather,
     wiki
 ) {
-
 
     const image =
         wiki?.image ||
@@ -280,13 +385,12 @@ function displayCity(
     const population =
         city.population
             ? formatNumber(city.population)
-            : "Маълумот дастрас нест";
+            : "Маълумот нест";
 
 
     searchResult.innerHTML = `
 
         <div class="city-result-card">
-
 
             <div class="city-result-image">
 
@@ -297,44 +401,29 @@ function displayCity(
 
                 <div class="image-overlay"></div>
 
-
                 <div class="city-badge">
-
-                    🇺🇸
-                    ${escapeHTML(city.admin1 || "USA")}
-
+                    🇺🇸 ${escapeHTML(city.admin1 || "USA")}
                 </div>
 
             </div>
 
 
-
             <div class="city-result-content">
 
-
                 <span class="result-label">
-
                     🇺🇸 CITY DISCOVERED
-
                 </span>
 
-
                 <h2>
-
                     ${escapeHTML(city.name)}
-
                 </h2>
 
-
                 <p class="city-description">
-
                     ${escapeHTML(description)}
-
                 </p>
 
 
                 <div class="city-stats">
-
 
                     <div class="stat">
 
@@ -349,19 +438,16 @@ function displayCity(
                             </small>
 
                             <strong>
-
                                 ${
                                     temperature !== undefined
                                     ? temperature + "°C"
                                     : "—"
                                 }
-
                             </strong>
 
                         </div>
 
                     </div>
-
 
 
                     <div class="stat">
@@ -377,15 +463,12 @@ function displayCity(
                             </small>
 
                             <strong>
-
                                 ${population}
-
                             </strong>
 
                         </div>
 
                     </div>
-
 
 
                     <div class="stat">
@@ -401,15 +484,12 @@ function displayCity(
                             </small>
 
                             <strong>
-
                                 ${weatherText}
-
                             </strong>
 
                         </div>
 
                     </div>
-
 
 
                     <div class="stat">
@@ -425,43 +505,27 @@ function displayCity(
                             </small>
 
                             <strong>
-
                                 ${
                                     wind !== undefined
                                     ? wind + " km/h"
                                     : "—"
                                 }
-
                             </strong>
 
                         </div>
 
                     </div>
 
-
                 </div>
-
 
 
                 <button
                     class="explore-city-btn"
-                    onclick="showCityDetails(
-                        ${city.latitude},
-                        ${city.longitude},
-                        '${escapeAttribute(city.name)}',
-                        '${escapeAttribute(city.admin1 || "")}',
-                        ${temperature ?? 0},
-                        '${escapeAttribute(weatherText)}',
-                        '${escapeAttribute(feelsLike ?? "—")}'
-                    )"
-                >
+                    id="cityDetailsButton">
 
-                    Маълумоти пурра
-
-                    →
+                    Маълумоти пурра →
 
                 </button>
-
 
             </div>
 
@@ -469,45 +533,58 @@ function displayCity(
 
 
         <div
-            id="details-${slugify(city.name)}"
-            class="city-details"
-        >
-
+            id="cityDetails"
+            class="city-details">
         </div>
 
     `;
+
+
+    document
+        .getElementById("cityDetailsButton")
+        .addEventListener(
+            "click",
+            () => {
+
+                showCityDetails(
+                    city,
+                    temperature,
+                    weatherText,
+                    feelsLike
+                );
+
+            }
+        );
 
 
     searchResult.scrollIntoView({
         behavior: "smooth",
         block: "center"
     });
+
 }
 
 
-
-// ======================================
-// CITY DETAILS
-// ======================================
+// ==========================================
+// 📊 CITY DETAILS
+// ==========================================
 
 function showCityDetails(
-    latitude,
-    longitude,
-    cityName,
-    state,
+    city,
     temperature,
     weatherText,
     feelsLike
 ) {
 
-
     const details =
-        document.getElementById(
-            `details-${slugify(cityName)}`
-        );
+        document.getElementById("cityDetails");
 
 
     if (!details) return;
+
+
+    const info =
+        cityDatabase[city.name];
 
 
     details.innerHTML = `
@@ -521,8 +598,8 @@ function showCityDetails(
             </h4>
 
             <p>
-                ${cityName},
-                ${state},
+                ${escapeHTML(city.name)},
+                ${escapeHTML(city.admin1 || "")},
                 USA
             </p>
 
@@ -538,7 +615,7 @@ function showCityDetails(
             </h4>
 
             <p>
-                ${temperature}°C
+                ${temperature ?? "—"}°C
             </p>
 
         </div>
@@ -561,6 +638,42 @@ function showCityDetails(
 
         <div class="detail-card">
 
+            <span>🎓</span>
+
+            <h4>
+                Universities
+            </h4>
+
+            <p>
+                ${
+                    info?.universities?.join(", ")
+                    || "Маълумот дастрас нест"
+                }
+            </p>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <span>💼</span>
+
+            <h4>
+                Jobs
+            </h4>
+
+            <p>
+                ${
+                    info?.jobs?.join(", ")
+                    || "Маълумот дастрас нест"
+                }
+            </p>
+
+        </div>
+
+
+        <div class="detail-card">
+
             <span>🌎</span>
 
             <h4>
@@ -568,38 +681,8 @@ function showCityDetails(
             </h4>
 
             <p>
-                ${Number(latitude).toFixed(4)},
-                ${Number(longitude).toFixed(4)}
-            </p>
-
-        </div>
-
-
-        <div class="detail-card">
-
-            <span>🌡️</span>
-
-            <h4>
-                Feels like
-            </h4>
-
-            <p>
-                ${feelsLike}°C
-            </p>
-
-        </div>
-
-
-        <div class="detail-card">
-
-            <span>🇺🇸</span>
-
-            <h4>
-                Country
-            </h4>
-
-            <p>
-                United States
+                ${Number(city.latitude).toFixed(4)},
+                ${Number(city.longitude).toFixed(4)}
             </p>
 
         </div>
@@ -611,55 +694,13 @@ function showCityDetails(
         behavior: "smooth",
         block: "nearest"
     });
+
 }
 
 
-
-// ======================================
-// LOADING
-// ======================================
-
-function showLoading() {
-
-    searchResult.innerHTML = `
-
-        <div class="search-error">
-
-            🔎
-
-            <br><br>
-
-            Маълумоти шаҳр гирифта шуда истодааст...
-
-        </div>
-
-    `;
-}
-
-
-
-// ======================================
-// ERROR
-// ======================================
-
-function showError(message) {
-
-    searchResult.innerHTML = `
-
-        <div class="search-error">
-
-            ${message}
-
-        </div>
-
-    `;
-}
-
-
-
-// ======================================
-// WEATHER
-// ======================================
+// ==========================================
+// 🌤️ WEATHER TEXT
+// ==========================================
 
 function getWeatherText(code) {
 
@@ -671,125 +712,42 @@ function getWeatherText(code) {
         return "☀️ Clear";
     }
 
-    if ([1,2,3].includes(code)) {
-        return "🌤️ Partly cloudy";
+    if ([1, 2, 3].includes(code)) {
+        return "🌤️ Cloudy";
     }
 
-    if ([45,48].includes(code)) {
+    if ([45, 48].includes(code)) {
         return "🌫️ Fog";
     }
 
-    if ([51,53,55,56,57].includes(code)) {
+    if ([51, 53, 55, 56, 57].includes(code)) {
         return "🌦️ Drizzle";
     }
 
-    if ([61,63,65,66,67].includes(code)) {
+    if ([61, 63, 65, 66, 67].includes(code)) {
         return "🌧️ Rain";
     }
 
-    if ([71,73,75,77].includes(code)) {
+    if ([71, 73, 75, 77].includes(code)) {
         return "❄️ Snow";
     }
 
-    if ([80,81,82].includes(code)) {
+    if ([80, 81, 82].includes(code)) {
         return "🌧️ Showers";
     }
 
-    if ([95,96,99].includes(code)) {
+    if ([95, 96, 99].includes(code)) {
         return "⛈️ Thunderstorm";
     }
 
     return "🌤️ Weather";
+
 }
 
 
-
-// ======================================
-// FALLBACK IMAGES
-// ======================================
-
-function getFallbackImage(cityName) {
-
-    const images = {
-
-        "New York":
-            "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1400&q=85",
-
-        "Miami":
-            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85",
-
-        "Los Angeles":
-            "https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?auto=format&fit=crop&w=1400&q=85"
-
-    };
-
-
-    return images[cityName] ||
-        "https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=1400&q=85";
-}
-
-
-
-// ======================================
-// POPULAR CITY CARDS
-// ======================================
-
-document
-    .querySelectorAll(".city-card")
-    .forEach(card => {
-
-        card.addEventListener(
-            "click",
-            () => {
-
-                const city =
-                    card.dataset.city;
-
-                searchInput.value = city;
-
-                searchCity(city);
-
-            }
-        );
-
-    });
-
-
-
-// ======================================
-// SEARCH BUTTON
-// ======================================
-
-searchButton.addEventListener(
-    "click",
-    () => searchCity()
-);
-
-
-
-// ======================================
-// ENTER KEY
-// ======================================
-
-searchInput.addEventListener(
-    "keydown",
-    event => {
-
-        if (event.key === "Enter") {
-
-            event.preventDefault();
-
-            searchCity();
-        }
-
-    }
-);
-
-
-
-// ======================================
-// LIVE SUGGESTIONS
-// ======================================
+// ==========================================
+// 🔎 LIVE SUGGESTIONS
+// ==========================================
 
 let suggestionTimer;
 
@@ -797,10 +755,7 @@ searchInput.addEventListener(
     "input",
     () => {
 
-        clearTimeout(
-            suggestionTimer
-        );
-
+        clearTimeout(suggestionTimer);
 
         const value =
             searchInput.value.trim();
@@ -817,12 +772,11 @@ searchInput.addEventListener(
         suggestionTimer =
             setTimeout(
                 () => showSuggestions(value),
-                450
+                400
             );
 
     }
 );
-
 
 
 async function showSuggestions(value) {
@@ -855,7 +809,7 @@ async function showSuggestions(value) {
                     place =>
                         place.country_code === "US"
                 )
-                .slice(0,5);
+                .slice(0, 5);
 
 
         suggestions.innerHTML =
@@ -865,8 +819,7 @@ async function showSuggestions(value) {
 
                         <div
                             class="suggestion"
-                            data-name="${escapeAttribute(place.name)}"
-                        >
+                            data-name="${escapeAttribute(place.name)}">
 
                             📍
                             ${escapeHTML(place.name)}
@@ -893,16 +846,15 @@ async function showSuggestions(value) {
                     "click",
                     () => {
 
-                        const name =
-                            item.dataset.name;
-
                         searchInput.value =
-                            name;
+                            item.dataset.name;
 
                         suggestions.innerHTML =
                             "";
 
-                        searchCity(name);
+                        searchCity(
+                            item.dataset.name
+                        );
 
                     }
                 );
@@ -910,25 +862,891 @@ async function showSuggestions(value) {
             });
 
 
-    } catch (error) {
+    } catch {
 
         suggestions.innerHTML = "";
 
     }
+
 }
 
 
+// ==========================================
+// 🗺️ INTERACTIVE USA MAP
+// ==========================================
 
-// ======================================
-// EXPLORE USA BUTTON
-// ======================================
+let usaMap = null;
+
+
+function initializeMap() {
+
+    if (typeof L === "undefined") {
+
+        console.error(
+            "Leaflet library not loaded."
+        );
+
+        return;
+    }
+
+
+    const mapElement =
+        document.getElementById("usaMap");
+
+
+    if (!mapElement) return;
+
+
+    usaMap =
+        L.map("usaMap").setView(
+            [39.5, -98.35],
+            4
+        );
+
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 18,
+            attribution:
+                "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(usaMap);
+
+
+    const mapCities = [
+
+        {
+            name: "New York",
+            lat: 40.7128,
+            lon: -74.0060
+        },
+
+        {
+            name: "Miami",
+            lat: 25.7617,
+            lon: -80.1918
+        },
+
+        {
+            name: "Los Angeles",
+            lat: 34.0522,
+            lon: -118.2437
+        },
+
+        {
+            name: "Chicago",
+            lat: 41.8781,
+            lon: -87.6298
+        },
+
+        {
+            name: "Houston",
+            lat: 29.7604,
+            lon: -95.3698
+        },
+
+        {
+            name: "Seattle",
+            lat: 47.6062,
+            lon: -122.3321
+        },
+
+        {
+            name: "Austin",
+            lat: 30.2672,
+            lon: -97.7431
+        }
+
+    ];
+
+
+    mapCities.forEach(city => {
+
+        const marker =
+            L.marker([
+                city.lat,
+                city.lon
+            ]).addTo(usaMap);
+
+
+        marker.bindPopup(`
+
+            <div class="map-popup">
+
+                <h3>
+                    🇺🇸 ${city.name}
+                </h3>
+
+                <p>
+                    Explore this city
+                </p>
+
+                <button
+                    class="map-city-button"
+                    data-city="${city.name}">
+
+                    View City
+
+                </button>
+
+            </div>
+
+        `);
+
+    });
+
+
+    usaMap.on(
+        "popupopen",
+        event => {
+
+            const button =
+                event.popup
+                    .getElement()
+                    .querySelector(".map-city-button");
+
+
+            if (!button) return;
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const city =
+                        button.dataset.city;
+
+                    searchInput.value =
+                        city;
+
+                    searchCity(city);
+
+                    document
+                        .getElementById("explore")
+                        .scrollIntoView({
+                            behavior: "smooth"
+                        });
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// 🔎 FILTERS
+// ==========================================
+
+document
+    .getElementById("applyFilters")
+    .addEventListener(
+        "click",
+        applyFilters
+    );
+
+
+function applyFilters() {
+
+    const state =
+        document.getElementById(
+            "stateFilter"
+        ).value;
+
+
+    const weather =
+        document.getElementById(
+            "weatherFilter"
+        ).value;
+
+
+    const size =
+        document.getElementById(
+            "citySizeFilter"
+        ).value;
+
+
+    const results =
+        Object.entries(cityDatabase)
+            .filter(([name, city]) => {
+
+                if (
+                    state !== "all" &&
+                    city.state !== state
+                ) {
+                    return false;
+                }
+
+
+                if (
+                    weather !== "all" &&
+                    city.weather !== weather
+                ) {
+                    return false;
+                }
+
+
+                if (
+                    size !== "all" &&
+                    city.size !== size
+                ) {
+                    return false;
+                }
+
+
+                return true;
+
+            });
+
+
+    const container =
+        document.getElementById(
+            "filterResults"
+        );
+
+
+    if (results.length === 0) {
+
+        container.innerHTML = `
+            <div class="search-error">
+                ❌ Ягон шаҳр мувофиқ нест.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        results
+            .map(([name, city]) => `
+
+                <div class="filter-city-card">
+
+                    <h3>
+                        🇺🇸 ${name}
+                    </h3>
+
+                    <p>
+                        📍 ${city.state}
+                        <br>
+                        🌤️ ${city.weather}
+                        <br>
+                        👥 ${city.size}
+                    </p>
+
+                    <br>
+
+                    <button
+                        class="card-button filter-city-button"
+                        data-city="${name}">
+
+                        View City →
+
+                    </button>
+
+                </div>
+
+            `)
+            .join("");
+
+
+    document
+        .querySelectorAll(".filter-city-button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const city =
+                        button.dataset.city;
+
+                    searchInput.value =
+                        city;
+
+                    searchCity(city);
+
+                    document
+                        .getElementById("explore")
+                        .scrollIntoView({
+                            behavior: "smooth"
+                        });
+
+                }
+            );
+
+        });
+
+}
+
+
+// ==========================================
+// 🤖 AI CITY MATCH
+// ==========================================
+
+document
+    .getElementById("findMyCity")
+    .addEventListener(
+        "click",
+        findMyCity
+    );
+
+
+function findMyCity() {
+
+    const weather =
+        document.getElementById(
+            "aiWeather"
+        ).value;
+
+
+    const budget =
+        document.getElementById(
+            "aiBudget"
+        ).value;
+
+
+    const goal =
+        document.getElementById(
+            "aiGoal"
+        ).value;
+
+
+    const scoredCities = [];
+
+
+    Object.entries(cityDatabase)
+        .forEach(([name, city]) => {
+
+            let score = 0;
+
+
+            if (city.weather === weather) {
+                score += 3;
+            }
+
+
+            if (city.budget === budget) {
+                score += 3;
+            }
+
+
+            if (
+                city.goal.includes(goal)
+            ) {
+                score += 4;
+            }
+
+
+            scoredCities.push({
+                name,
+                score,
+                city
+            });
+
+        });
+
+
+    scoredCities.sort(
+        (a, b) =>
+            b.score - a.score
+    );
+
+
+    const best =
+        scoredCities.slice(0, 3);
+
+
+    const result =
+        document.getElementById(
+            "aiResult"
+        );
+
+
+    result.innerHTML = `
+
+        <div class="ai-result-card">
+
+            <h3>
+                🤖 Натиҷаи AI City Match
+            </h3>
+
+            <p>
+                Мувофиқи ҷавобҳои ту,
+                ин шаҳрҳо бештар мувофиқанд:
+            </p>
+
+
+            <div class="ai-result-cities">
+
+                ${
+                    best.map(item => `
+
+                        <div class="ai-city">
+
+                            <strong>
+                                🇺🇸 ${item.name}
+                            </strong>
+
+                            <span>
+                                Match Score:
+                                ${item.score}/10
+                            </span>
+
+                            <br><br>
+
+                            <button
+                                class="card-button ai-city-button"
+                                data-city="${item.name}">
+
+                                View City →
+
+                            </button>
+
+                        </div>
+
+                    `).join("")
+                }
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document
+        .querySelectorAll(".ai-city-button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const city =
+                        button.dataset.city;
+
+                    searchInput.value =
+                        city;
+
+                    searchCity(city);
+
+                    document
+                        .getElementById("explore")
+                        .scrollIntoView({
+                            behavior: "smooth"
+                        });
+
+                }
+            );
+
+        });
+
+}
+
+
+// ==========================================
+// 🎓 UNIVERSITIES + 💼 JOBS
+// ==========================================
+
+document
+    .querySelectorAll("[data-education]")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const type =
+                    button.dataset.education;
+
+                showEducation(type);
+
+            }
+        );
+
+    });
+
+
+function showEducation(type) {
+
+    const result =
+        document.getElementById(
+            "educationResult"
+        );
+
+
+    let title = "";
+    let items = [];
+
+
+    if (type === "universities") {
+
+        title =
+            "🎓 Донишгоҳҳои маъруф";
+
+        items = [
+
+            ["New York", "Columbia University"],
+            ["New York", "New York University"],
+            ["Los Angeles", "UCLA"],
+            ["Los Angeles", "USC"],
+            ["Miami", "University of Miami"],
+            ["Austin", "University of Texas at Austin"],
+            ["Seattle", "University of Washington"],
+            ["Houston", "Rice University"]
+
+        ];
+
+    }
+
+
+    if (type === "study") {
+
+        title =
+            "📚 Study Options";
+
+        items = [
+
+            ["New York", "Business & Finance"],
+            ["Los Angeles", "Media & Technology"],
+            ["Miami", "Business & Tourism"],
+            ["Austin", "Technology & Software"],
+            ["Seattle", "Engineering & Technology"],
+            ["Houston", "Engineering & Healthcare"]
+
+        ];
+
+    }
+
+
+    if (type === "jobs") {
+
+        title =
+            "💼 Popular Job Fields";
+
+        items = [
+
+            ["New York", "Finance"],
+            ["Los Angeles", "Entertainment"],
+            ["Miami", "Tourism"],
+            ["Austin", "Technology"],
+            ["Seattle", "Software"],
+            ["Houston", "Energy"]
+
+        ];
+
+    }
+
+
+    result.innerHTML = `
+
+        <div class="education-result-box">
+
+            <h3>
+                ${title}
+            </h3>
+
+            <div class="education-list">
+
+                ${
+                    items.map(item => `
+
+                        <div class="education-item">
+
+                            <strong>
+                                🇺🇸 ${item[0]}
+                            </strong>
+
+                            <span>
+                                ${item[1]}
+                            </span>
+
+                        </div>
+
+                    `).join("")
+                }
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    result.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+    });
+
+}
+
+
+// ==========================================
+// 👤 USER PROFILE
+// ==========================================
+
+const profileButton =
+    document.getElementById(
+        "profileButton"
+    );
+
+
+const profileModal =
+    document.getElementById(
+        "profileModal"
+    );
+
+
+const closeProfile =
+    document.getElementById(
+        "closeProfile"
+    );
+
+
+profileButton.addEventListener(
+    "click",
+    () => {
+
+        profileModal.classList.add(
+            "active"
+        );
+
+    }
+);
+
+
+closeProfile.addEventListener(
+    "click",
+    () => {
+
+        profileModal.classList.remove(
+            "active"
+        );
+
+    }
+);
+
+
+profileModal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target ===
+            profileModal
+        ) {
+
+            profileModal.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+);
+
+
+document
+    .getElementById("modalProfileButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            profileModal.classList.remove(
+                "active"
+            );
+
+            document
+                .getElementById("profile")
+                .scrollIntoView({
+                    behavior: "smooth"
+                });
+
+        }
+    );
+
+
+// ==========================================
+// 💾 SAVE PROFILE
+// ==========================================
+
+document
+    .getElementById("saveProfile")
+    .addEventListener(
+        "click",
+        saveProfile
+    );
+
+
+function saveProfile() {
+
+    const name =
+        document.getElementById(
+            "profileName"
+        ).value.trim();
+
+
+    const favorite =
+        document.getElementById(
+            "favoriteCity"
+        ).value.trim();
+
+
+    if (!name) {
+
+        document.getElementById(
+            "profileResult"
+        ).textContent =
+            "⚠️ Аввал номро навис.";
+
+        return;
+    }
+
+
+    localStorage.setItem(
+        "usaLifeProfile",
+        JSON.stringify({
+            name,
+            favorite
+        })
+    );
+
+
+    document.getElementById(
+        "profileResult"
+    ).innerHTML = `
+        ✅ Салом, ${escapeHTML(name)}!
+        Профили ту нигоҳ дошта шуд. 🇺🇸
+    `;
+
+}
+
+
+// ==========================================
+// 📂 LOAD PROFILE
+// ==========================================
+
+function loadProfile() {
+
+    const saved =
+        localStorage.getItem(
+            "usaLifeProfile"
+        );
+
+
+    if (!saved) return;
+
+
+    try {
+
+        const profile =
+            JSON.parse(saved);
+
+
+        document.getElementById(
+            "profileName"
+        ).value =
+            profile.name || "";
+
+
+        document.getElementById(
+            "favoriteCity"
+        ).value =
+            profile.favorite || "";
+
+
+    } catch {
+
+        localStorage.removeItem(
+            "usaLifeProfile"
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// 🏙️ POPULAR CITY CARDS
+// ==========================================
+
+document
+    .querySelectorAll(".city-card")
+    .forEach(card => {
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                const city =
+                    card.dataset.city;
+
+                searchInput.value =
+                    city;
+
+                searchCity(city);
+
+            }
+        );
+
+    });
+
+
+// ==========================================
+// 🔍 SEARCH BUTTON
+// ==========================================
+
+searchButton.addEventListener(
+    "click",
+    () => {
+
+        suggestions.innerHTML = "";
+
+        searchCity();
+
+    }
+);
+
+
+// ==========================================
+// ⌨️ ENTER KEY
+// ==========================================
+
+searchInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+            suggestions.innerHTML = "";
+
+            searchCity();
+
+        }
+
+    }
+);
+
+
+// ==========================================
+// 🗺️ EXPLORE BUTTON
+// ==========================================
 
 exploreButton.addEventListener(
     "click",
     () => {
 
         document
-            .getElementById("cities")
+            .getElementById("map")
             .scrollIntoView({
                 behavior: "smooth"
             });
@@ -937,27 +1755,16 @@ exploreButton.addEventListener(
 );
 
 
-
-// ======================================
-// AI MATCH BUTTON
-// ======================================
+// ==========================================
+// 🤖 HERO AI BUTTON
+// ==========================================
 
 matchButton.addEventListener(
     "click",
     () => {
 
-        showError(`
-            🤖 <strong>AI City Match</strong>
-            <br><br>
-            Ин қисми USA LIFE ҳоло омода шуда истодааст.
-            <br>
-            Дар версияи навбатӣ мо буҷа,
-            таҳсил, ҳаво ва тарзи зиндагиро истифода мебарем,
-            то шаҳрро барои корбар интихоб кунем. 🚀
-        `);
-
         document
-            .getElementById("explore")
+            .getElementById("aiMatch")
             .scrollIntoView({
                 behavior: "smooth"
             });
@@ -966,26 +1773,101 @@ matchButton.addEventListener(
 );
 
 
+// ==========================================
+// 📱 MOBILE MENU
+// ==========================================
 
-// ======================================
-// HELPERS
-// ======================================
+const menuButton =
+    document.getElementById(
+        "menuButton"
+    );
+
+
+menuButton.addEventListener(
+    "click",
+    () => {
+
+        const nav =
+            document.querySelector(
+                "nav"
+            );
+
+
+        if (
+            nav.style.display ===
+            "flex"
+        ) {
+
+            nav.style.display =
+                "";
+
+        } else {
+
+            nav.style.display =
+                "flex";
+
+            nav.style.position =
+                "absolute";
+
+            nav.style.top =
+                "76px";
+
+            nav.style.left =
+                "0";
+
+            nav.style.width =
+                "100%";
+
+            nav.style.padding =
+                "20px";
+
+            nav.style.flexDirection =
+                "column";
+
+            nav.style.background =
+                "#080c13";
+
+        }
+
+    }
+);
+
+
+// ==========================================
+// 🖼️ FALLBACK IMAGES
+// ==========================================
+
+function getFallbackImage(cityName) {
+
+    const images = {
+
+        "New York":
+            "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1400&q=85",
+
+        "Miami":
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85",
+
+        "Los Angeles":
+            "https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?auto=format&fit=crop&w=1400&q=85"
+
+    };
+
+
+    return images[cityName] ||
+        "https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=1400&q=85";
+
+}
+
+
+// ==========================================
+// 🔢 HELPERS
+// ==========================================
 
 function formatNumber(number) {
 
     return new Intl.NumberFormat(
         "en-US"
     ).format(number);
-
-}
-
-
-function slugify(text) {
-
-    return text
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
 
 }
 
@@ -1007,3 +1889,21 @@ function escapeAttribute(text) {
     return escapeHTML(text);
 
 }
+
+
+// ==========================================
+// 🚀 START USA LIFE
+// ==========================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        initializeMap();
+
+        loadProfile();
+
+        applyFilters();
+
+    }
+);
