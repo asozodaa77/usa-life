@@ -1078,29 +1078,31 @@ async function sendGeminiMessage() {
     messages.scrollTop = messages.scrollHeight;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{
-                    parts: [{ text: `Ту ёрдамчии сайти USA Life ҳастӣ. Танҳо ба саволҳо дар бораи шаҳрҳо, донишгоҳҳо ва зиндагӣ дар АҚШ кӯтоҳ ва равон ба забони тоҷикӣ ҷавоб диҳӣ. Савол: ${userText}` }]
+                    parts: [{ text: `Ту ёрдамчии сайти USA Life ҳастӣ. Ба саволҳо дар бораи шаҳрҳо ва донишгоҳҳои АҚШ кӯтоҳ ва равон ба забони тоҷикӣ ҷавоб диҳӣ. Савол: ${userText}` }]
                 }]
             })
         });
 
         const data = await response.json();
         
+        if (data.error) {
+            throw new Error(data.error.message || "API Error");
+        }
+
         if (data.candidates && data.candidates[0].content.parts[0].text) {
             const reply = data.candidates[0].content.parts[0].text;
             document.getElementById(loadingId).remove();
             messages.innerHTML += `<div style="text-align: left; margin: 8px 0; color: #7ee787;"><b>AI:</b> ${reply}</div>`;
-        } else {
-            throw new Error("No response content");
         }
     } catch (error) {
         const loadingElem = document.getElementById(loadingId);
         if (loadingElem) loadingElem.remove();
-        messages.innerHTML += `<div style="text-align: left; margin: 8px 0; color: #ff7b72;"><b>Хатогӣ:</b> Пайваст шуда нашуд.</div>`;
+        messages.innerHTML += `<div style="text-align: left; margin: 8px 0; color: #ff7b72;"><b>Хатогӣ:</b> ${error.message}</div>`;
     }
     messages.scrollTop = messages.scrollHeight;
 }
