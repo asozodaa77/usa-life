@@ -1,23 +1,112 @@
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USA Life — Admin Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0d1117; color: #fff; padding: 20px; }
+        .admin-card { background: #161b22; padding: 20px; border-radius: 10px; max-width: 450px; margin: auto; border: 1px solid #30363d; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: #fff; box-sizing: border-box; }
+        button { background: #238636; font-weight: bold; cursor: pointer; border: none; }
+        button:hover { background: #2ea043; }
+        .status { margin-top: 10px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDs5M9J5pxoz2W2euXLOt7u3VLfE0ba3YU",
-    authDomain: "usa-life-4b54c.firebaseapp.com",
-    projectId: "usa-life-4b54c",
-    storageBucket: "usa-life-4b54c.firebasestorage.app",
-    messagingSenderId: "370492592727",
-    appId: "1:370492592727:web:fe89f2455712b354c2c912",
-    measurementId: "G-KN245XVLLC"
-  };
+    <div class="admin-card">
+        <h2>🛠️ Панели Администратор</h2>
+        <p>Илова кардани шаҳри нав ба базаи Firebase:</p>
+        
+        <input type="text" id="cityName" placeholder="Номи шаҳр (масалан: Boston)">
+        <input type="text" id="stateName" placeholder="Штат (масалан: Massachusetts)">
+        
+        <select id="weatherType">
+            <option value="warm">Warm (Гарм)</option>
+            <option value="cool">Cool (Сард)</option>
+        </select>
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+        <select id="citySize">
+            <option value="large">Large (Калон)</option>
+            <option value="medium">Medium (Миёна)</option>
+            <option value="small">Small (Хурд)</option>
+        </select>
+
+        <select id="budgetType">
+            <option value="high">High (Бюҷети баланд)</option>
+            <option value="medium">Medium (Миёна)</option>
+            <option value="low">Low (Арзон)</option>
+        </select>
+
+        <input type="text" id="universities" placeholder="Донишгоҳҳо (бо вергул: MIT, Harvard)">
+        <input type="text" id="jobs" placeholder="Соҳаҳои кор (бо вергул: Tech, Finance)">
+
+        <button onclick="addCityToFirebase()">➕ Илова кардан ба база</button>
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- Firebase SDK Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDs5M9J5pxoz2W2euXLoT7", 
+            authDomain: "usa-life-4b54c.firebaseapp.com",
+            databaseURL: "https://usa-life-4b54c-default-rtdb.firebaseio.com",
+            projectId: "usa-life-4b54c",
+            storageBucket: "usa-life-4b54c.firebasestorage.app",
+            messagingSenderId: "370492592727",
+            appId: "1:370492592727:web:fe89f2455",
+            measurementId: "G-KN245XVLLC"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function addCityToFirebase() {
+            const name = document.getElementById('cityName').value.trim();
+            const state = document.getElementById('stateName').value.trim();
+            const weather = document.getElementById('weatherType').value;
+            const size = document.getElementById('citySize').value;
+            const budget = document.getElementById('budgetType').value;
+            const unis = document.getElementById('universities').value.split(',').map(s => s.trim());
+            const jobs = document.getElementById('jobs').value.split(',').map(s => s.trim());
+            const status = document.getElementById('status');
+
+            if (!name || !state) {
+                status.innerText = "⚠️ Номи шаҳр ва штатро нависед!";
+                status.style.color = "#ff4d4d";
+                return;
+            }
+
+            status.innerText = "⏳ Нигоҳ дошта шуда истодааст...";
+            status.style.color = "#e3b341";
+
+            database.ref('cities/' + name).set({
+                state: state,
+                weather: weather,
+                size: size,
+                budget: budget,
+                goal: ["job", "life", "study"],
+                universities: unis,
+                jobs: jobs
+            }, (error) => {
+                if (error) {
+                    status.innerText = "❌ Хатогӣ: " + error.message;
+                    status.style.color = "#ff4d4d";
+                } else {
+                    status.innerText = `✅ Шаҳри ${name} муваффақона ба база илова шуд!`;
+                    status.style.color = "#2ea043";
+                    
+                    document.getElementById('cityName').value = '';
+                    document.getElementById('stateName').value = '';
+                    document.getElementById('universities').value = '';
+                    document.getElementById('jobs').value = '';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
