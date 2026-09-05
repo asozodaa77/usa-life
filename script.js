@@ -1051,3 +1051,56 @@ document.addEventListener("DOMContentLoaded", () => {
     loadProfile();
     applyFilters();
 });
+// --- Gemini AI Chat Logic ---
+const GEMINI_API_KEY = "AQ.Ab8RN6IDhKEMaRMK_R9OTIxUPtxkY1v3JUVQ1tnRdCcmv1BcVg"; 
+
+function toggleChat() {
+    const box = document.getElementById('ai-chat-box');
+    if (box) {
+        box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'flex' : 'none';
+    }
+}
+
+async function sendGeminiMessage() {
+    const input = document.getElementById('chat-input');
+    const messages = document.getElementById('chat-messages');
+    if (!input || !messages) return;
+
+    const userText = input.value.trim();
+    if (!userText) return;
+
+    messages.innerHTML += `<div style="text-align: right; margin: 8px 0; color: #58a6ff;"><b>Ту:</b> ${userText}</div>`;
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+
+    const loadingId = 'loading-' + Date.now();
+    messages.innerHTML += `<div id="${loadingId}" style="text-align: left; margin: 8px 0; color: #8b949e;"><i>AI фикр дорад...</i></div>`;
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: `Ту ёрдамчии сайти USA Life ҳастӣ. Танҳо ба саволҳо дар бораи шаҳрҳо, донишгоҳҳо ва зиндагӣ дар АҚШ кӯтоҳ ва равон ба забони тоҷикӣ ҷавоб диҳӣ. Савол: ${userText}` }]
+                }]
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+            const reply = data.candidates[0].content.parts[0].text;
+            document.getElementById(loadingId).remove();
+            messages.innerHTML += `<div style="text-align: left; margin: 8px 0; color: #7ee787;"><b>AI:</b> ${reply}</div>`;
+        } else {
+            throw new Error("No response content");
+        }
+    } catch (error) {
+        const loadingElem = document.getElementById(loadingId);
+        if (loadingElem) loadingElem.remove();
+        messages.innerHTML += `<div style="text-align: left; margin: 8px 0; color: #ff7b72;"><b>Хатогӣ:</b> Пайваст шуда нашуд.</div>`;
+    }
+    messages.scrollTop = messages.scrollHeight;
+}
