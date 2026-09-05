@@ -1,233 +1,1009 @@
 const searchInput = document.getElementById("cityInput");
 const searchButton = document.getElementById("searchButton");
 
-const cities = {
-  "new york": {
-    name: "New York",
-    state: "New York",
-    emoji: "🗽",
-    image:
-      "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1400&q=85",
-    description:
-      "Яке аз машҳуртарин шаҳрҳои ҷаҳон ва маркази бузурги бизнес, фарҳанг ва зиндагии шаҳрӣ.",
-    rent: "$2,500+",
-    weather: "🌤️ 15–28°C",
-    jobs: "💼 Technology, Finance, Business"
-  },
+const searchResult = document.getElementById("searchResult");
+const suggestions = document.getElementById("suggestions");
 
-  "miami": {
-    name: "Miami",
-    state: "Florida",
-    emoji: "🌴",
-    image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85",
-    description:
-      "Шаҳри офтобӣ бо соҳилҳои машҳур, ҳавои гарм ва зиндагии фаъол.",
-    rent: "$2,000+",
-    weather: "☀️ 22–32°C",
-    jobs: "💼 Tourism, Business, Technology"
-  },
-
-  "los angeles": {
-    name: "Los Angeles",
-    state: "California",
-    emoji: "🎬",
-    image:
-      "https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?auto=format&fit=crop&w=1400&q=85",
-    description:
-      "Шаҳри бузурги Калифорния, машҳур бо Hollywood, кино ва соҳилҳои зебо.",
-    rent: "$2,400+",
-    weather: "☀️ 15–30°C",
-    jobs: "💼 Film, Technology, Business"
-  },
-
-  chicago: {
-    name: "Chicago",
-    state: "Illinois",
-    emoji: "🏙️",
-    image:
-      "https://images.unsplash.com/photo-1494522358652-f30e61a60313?auto=format&fit=crop&w=1400&q=85",
-    description:
-      "Шаҳри бузург дар соҳили Lake Michigan бо архитектураи машҳур ва иқтисоди қавӣ.",
-    rent: "$1,700+",
-    weather: "🌦️ 5–28°C",
-    jobs: "💼 Finance, Technology, Business"
-  },
-
-  boston: {
-    name: "Boston",
-    state: "Massachusetts",
-    emoji: "🎓",
-    image:
-      "https://images.unsplash.com/photo-1501975558162-0be7b0a1e8b8?auto=format&fit=crop&w=1400&q=85",
-    description:
-      "Шаҳри таърихӣ ва донишгоҳии машҳур, ки барои таҳсил имкониятҳои зиёд дорад.",
-    rent: "$2,600+",
-    weather: "🌤️ 5–27°C",
-    jobs: "💼 Education, Medicine, Technology"
-  }
-};
+const exploreButton = document.getElementById("exploreButton");
+const matchButton = document.getElementById("matchButton");
 
 
-function searchCity() {
-  const value = searchInput.value.trim().toLowerCase();
+// ======================================
+// USA LIFE
+// Dynamic City Explorer
+// ======================================
 
-  if (!value) {
-    showMessage("⚠️ Номи шаҳрро навис!");
-    return;
-  }
 
-  const city = cities[value];
+// SEARCH CITY
 
-  if (!city) {
-    showMessage(`
-      ❌ Шаҳри "<strong>${searchInput.value}</strong>" ёфт нашуд.
-      <br>
-      <small>Кӯшиш кун: New York, Miami, Los Angeles, Chicago ё Boston</small>
-    `);
-    return;
-  }
+async function searchCity(cityName = null) {
 
-  showCity(city);
+    const value = (
+        cityName ||
+        searchInput.value
+    ).trim();
+
+    if (!value) {
+
+        showError("⚠️ Аввал номи шаҳрро навис!");
+
+        return;
+    }
+
+
+    searchButton.disabled = true;
+
+    searchButton.textContent = "Ҷустуҷӯ...";
+
+
+    showLoading();
+
+
+    try {
+
+        // --------------------------------
+        // 1. Find USA city
+        // --------------------------------
+
+        const geoURL =
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(value)}&count=10&language=en&format=json&countryCode=US`;
+
+        const geoResponse = await fetch(geoURL);
+
+        if (!geoResponse.ok) {
+            throw new Error("Geocoding error");
+        }
+
+        const geoData = await geoResponse.json();
+
+
+        if (
+            !geoData.results ||
+            geoData.results.length === 0
+        ) {
+
+            showError(`
+                ❌ Шаҳри "<strong>${escapeHTML(value)}</strong>" ёфт нашуд.
+                <br>
+                <small>
+                Номи шаҳри ИМА-ро бо забони англисӣ навис.
+                </small>
+            `);
+
+            return;
+        }
+
+
+        // Find best populated place
+
+        const city =
+            geoData.results.find(
+                place =>
+                    place.country_code === "US" &&
+                    place.feature_code &&
+                    place.feature_code.includes("PPL")
+            ) ||
+            geoData.results.find(
+                place =>
+                    place.country_code === "US"
+            ) ||
+            geoData.results[0];
+
+
+        // --------------------------------
+        // 2. Weather
+        // --------------------------------
+
+        const weatherURL =
+            `https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
+
+        const weatherResponse =
+            await fetch(weatherURL);
+
+        const weatherData =
+            await weatherResponse.json();
+
+
+        // --------------------------------
+        // 3. Wikipedia image
+        // --------------------------------
+
+        const wikiData =
+            await getWikipedia(city.name);
+
+
+        // --------------------------------
+        // 4. Show city
+        // --------------------------------
+
+        displayCity(
+            city,
+            weatherData,
+            wikiData
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(`
+            ❌ Ҳангоми гирифтани маълумоти шаҳр мушкил пайдо шуд.
+            <br>
+            <small>
+            Internet connection-ро санҷ ва дубора кӯшиш кун.
+            </small>
+        `);
+
+    } finally {
+
+        searchButton.disabled = false;
+
+        searchButton.textContent = "Ҷустуҷӯ";
+    }
 }
 
 
-function showCity(city) {
-  let result = document.getElementById("searchResult");
 
-  if (!result) {
-    result = document.createElement("div");
-    result.id = "searchResult";
+// ======================================
+// WIKIPEDIA IMAGE
+// ======================================
 
-    const hero = document.querySelector(".hero");
+async function getWikipedia(cityName) {
 
-    if (hero) {
-      hero.appendChild(result);
-    } else {
-      document.body.appendChild(result);
+    try {
+
+        const searchURL =
+            `https://en.wikipedia.org/w/rest.php/v1/search/page?q=${encodeURIComponent(cityName)}&limit=5`;
+
+        const response =
+            await fetch(searchURL);
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data.pages ||
+            data.pages.length === 0
+        ) {
+            return null;
+        }
+
+
+        // Prefer city-related result
+
+        const page =
+            data.pages.find(
+                item =>
+                    item.title
+                    .toLowerCase()
+                    .includes(cityName.toLowerCase())
+            ) ||
+            data.pages[0];
+
+
+        const title =
+            encodeURIComponent(page.title);
+
+
+        const summaryURL =
+            `https://en.wikipedia.org/api/rest_v1/page/summary/${title}`;
+
+
+        const summaryResponse =
+            await fetch(summaryURL);
+
+
+        if (!summaryResponse.ok) {
+            return null;
+        }
+
+
+        const summary =
+            await summaryResponse.json();
+
+
+        return {
+
+            image:
+                summary.thumbnail?.source ||
+                summary.originalimage?.source ||
+                null,
+
+            description:
+                summary.extract ||
+                null,
+
+            url:
+                summary.content_urls?.desktop?.page ||
+                null
+
+        };
+
+
+    } catch (error) {
+
+        console.log(
+            "Wikipedia image unavailable"
+        );
+
+        return null;
     }
-  }
+}
 
-  result.innerHTML = `
-    <div class="city-result-card">
 
-      <div class="city-result-image">
-        <img 
-          src="${city.image}" 
-          alt="${city.name}"
-          onerror="this.src='https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=1400&q=85'"
+
+// ======================================
+// DISPLAY CITY
+// ======================================
+
+function displayCity(
+    city,
+    weather,
+    wiki
+) {
+
+
+    const image =
+        wiki?.image ||
+        getFallbackImage(city.name);
+
+
+    const description =
+        wiki?.description ||
+        `Маълумот дар бораи ${city.name}, ${city.admin1 || "USA"}.`;
+
+
+    const temperature =
+        weather?.current?.temperature_2m;
+
+
+    const feelsLike =
+        weather?.current?.apparent_temperature;
+
+
+    const wind =
+        weather?.current?.wind_speed_10m;
+
+
+    const weatherText =
+        getWeatherText(
+            weather?.current?.weather_code
+        );
+
+
+    const population =
+        city.population
+            ? formatNumber(city.population)
+            : "Маълумот дастрас нест";
+
+
+    searchResult.innerHTML = `
+
+        <div class="city-result-card">
+
+
+            <div class="city-result-image">
+
+                <img
+                    src="${escapeAttribute(image)}"
+                    alt="${escapeAttribute(city.name)}"
+                >
+
+                <div class="image-overlay"></div>
+
+
+                <div class="city-badge">
+
+                    🇺🇸
+                    ${escapeHTML(city.admin1 || "USA")}
+
+                </div>
+
+            </div>
+
+
+
+            <div class="city-result-content">
+
+
+                <span class="result-label">
+
+                    🇺🇸 CITY DISCOVERED
+
+                </span>
+
+
+                <h2>
+
+                    ${escapeHTML(city.name)}
+
+                </h2>
+
+
+                <p class="city-description">
+
+                    ${escapeHTML(description)}
+
+                </p>
+
+
+                <div class="city-stats">
+
+
+                    <div class="stat">
+
+                        <span class="stat-icon">
+                            🌡️
+                        </span>
+
+                        <div>
+
+                            <small>
+                                Ҳарорат
+                            </small>
+
+                            <strong>
+
+                                ${
+                                    temperature !== undefined
+                                    ? temperature + "°C"
+                                    : "—"
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="stat">
+
+                        <span class="stat-icon">
+                            👥
+                        </span>
+
+                        <div>
+
+                            <small>
+                                Population
+                            </small>
+
+                            <strong>
+
+                                ${population}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="stat">
+
+                        <span class="stat-icon">
+                            🌤️
+                        </span>
+
+                        <div>
+
+                            <small>
+                                Weather
+                            </small>
+
+                            <strong>
+
+                                ${weatherText}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="stat">
+
+                        <span class="stat-icon">
+                            💨
+                        </span>
+
+                        <div>
+
+                            <small>
+                                Wind
+                            </small>
+
+                            <strong>
+
+                                ${
+                                    wind !== undefined
+                                    ? wind + " km/h"
+                                    : "—"
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <button
+                    class="explore-city-btn"
+                    onclick="showCityDetails(
+                        ${city.latitude},
+                        ${city.longitude},
+                        '${escapeAttribute(city.name)}',
+                        '${escapeAttribute(city.admin1 || "")}',
+                        ${temperature ?? 0},
+                        '${escapeAttribute(weatherText)}',
+                        '${escapeAttribute(feelsLike ?? "—")}'
+                    )"
+                >
+
+                    Маълумоти пурра
+
+                    →
+
+                </button>
+
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="details-${slugify(city.name)}"
+            class="city-details"
         >
 
-        <div class="image-overlay"></div>
-
-        <div class="city-badge">
-          ${city.emoji} ${city.state}
-        </div>
-      </div>
-
-      <div class="city-result-content">
-
-        <span class="result-label">
-          🇺🇸 CITY DISCOVERED
-        </span>
-
-        <h2>${city.name}</h2>
-
-        <p class="city-description">
-          ${city.description}
-        </p>
-
-        <div class="city-stats">
-
-          <div class="stat">
-            <span>🏠</span>
-            <div>
-              <small>Rent</small>
-              <strong>${city.rent}</strong>
-            </div>
-          </div>
-
-          <div class="stat">
-            <span>🌤️</span>
-            <div>
-              <small>Climate</small>
-              <strong>${city.weather}</strong>
-            </div>
-          </div>
-
-          <div class="stat">
-            <span>💼</span>
-            <div>
-              <small>Popular jobs</small>
-              <strong>${city.jobs}</strong>
-            </div>
-          </div>
-
         </div>
 
-        <button class="explore-city-btn" onclick="exploreCity('${city.name}')">
-          Explore ${city.name}
-          <span>→</span>
-        </button>
+    `;
 
-      </div>
-    </div>
-  `;
 
-  result.classList.remove("show-result");
-
-  setTimeout(() => {
-    result.classList.add("show-result");
-  }, 50);
-
-  setTimeout(() => {
-    result.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
+    searchResult.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
     });
-  }, 150);
 }
 
 
-function showMessage(message) {
-  let result = document.getElementById("searchResult");
 
-  if (!result) {
-    result = document.createElement("div");
-    result.id = "searchResult";
+// ======================================
+// CITY DETAILS
+// ======================================
 
-    const hero = document.querySelector(".hero");
+function showCityDetails(
+    latitude,
+    longitude,
+    cityName,
+    state,
+    temperature,
+    weatherText,
+    feelsLike
+) {
 
-    if (hero) {
-      hero.appendChild(result);
-    } else {
-      document.body.appendChild(result);
+
+    const details =
+        document.getElementById(
+            `details-${slugify(cityName)}`
+        );
+
+
+    if (!details) return;
+
+
+    details.innerHTML = `
+
+        <div class="detail-card">
+
+            <span>📍</span>
+
+            <h4>
+                Ҷойгиршавӣ
+            </h4>
+
+            <p>
+                ${cityName},
+                ${state},
+                USA
+            </p>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <span>🌡️</span>
+
+            <h4>
+                Ҳарорати ҳозира
+            </h4>
+
+            <p>
+                ${temperature}°C
+            </p>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <span>🌤️</span>
+
+            <h4>
+                Обу ҳаво
+            </h4>
+
+            <p>
+                ${weatherText}
+            </p>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <span>🌎</span>
+
+            <h4>
+                Coordinates
+            </h4>
+
+            <p>
+                ${Number(latitude).toFixed(4)},
+                ${Number(longitude).toFixed(4)}
+            </p>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <span>🌡️</span>
+
+            <h4>
+                Feels like
+            </h4>
+
+            <p>
+                ${feelsLike}°C
+            </p>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <span>🇺🇸</span>
+
+            <h4>
+                Country
+            </h4>
+
+            <p>
+                United States
+            </p>
+
+        </div>
+
+    `;
+
+
+    details.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+    });
+}
+
+
+
+// ======================================
+// LOADING
+// ======================================
+
+function showLoading() {
+
+    searchResult.innerHTML = `
+
+        <div class="search-error">
+
+            🔎
+
+            <br><br>
+
+            Маълумоти шаҳр гирифта шуда истодааст...
+
+        </div>
+
+    `;
+}
+
+
+
+// ======================================
+// ERROR
+// ======================================
+
+function showError(message) {
+
+    searchResult.innerHTML = `
+
+        <div class="search-error">
+
+            ${message}
+
+        </div>
+
+    `;
+}
+
+
+
+// ======================================
+// WEATHER
+// ======================================
+
+function getWeatherText(code) {
+
+    if (code === undefined || code === null) {
+        return "Маълумот нест";
     }
-  }
 
-  result.innerHTML = `
-    <div class="search-error">
-      ${message}
-    </div>
-  `;
+    if (code === 0) {
+        return "☀️ Clear";
+    }
 
-  result.classList.add("show-result");
+    if ([1,2,3].includes(code)) {
+        return "🌤️ Partly cloudy";
+    }
+
+    if ([45,48].includes(code)) {
+        return "🌫️ Fog";
+    }
+
+    if ([51,53,55,56,57].includes(code)) {
+        return "🌦️ Drizzle";
+    }
+
+    if ([61,63,65,66,67].includes(code)) {
+        return "🌧️ Rain";
+    }
+
+    if ([71,73,75,77].includes(code)) {
+        return "❄️ Snow";
+    }
+
+    if ([80,81,82].includes(code)) {
+        return "🌧️ Showers";
+    }
+
+    if ([95,96,99].includes(code)) {
+        return "⛈️ Thunderstorm";
+    }
+
+    return "🌤️ Weather";
 }
 
 
-function exploreCity(cityName) {
-  alert(
-    `🇺🇸 ${cityName}\n\n` +
-    `Ин қисми USA LIFE аст. Дар қадами оянда мо саҳифаи пурраи ${cityName}-ро месозем! 🚀`
-  );
+
+// ======================================
+// FALLBACK IMAGES
+// ======================================
+
+function getFallbackImage(cityName) {
+
+    const images = {
+
+        "New York":
+            "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1400&q=85",
+
+        "Miami":
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85",
+
+        "Los Angeles":
+            "https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?auto=format&fit=crop&w=1400&q=85"
+
+    };
+
+
+    return images[cityName] ||
+        "https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=1400&q=85";
 }
 
 
-searchButton.addEventListener("click", searchCity);
+
+// ======================================
+// POPULAR CITY CARDS
+// ======================================
+
+document
+    .querySelectorAll(".city-card")
+    .forEach(card => {
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                const city =
+                    card.dataset.city;
+
+                searchInput.value = city;
+
+                searchCity(city);
+
+            }
+        );
+
+    });
 
 
-searchInput.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
-    searchCity();
-  }
-});
+
+// ======================================
+// SEARCH BUTTON
+// ======================================
+
+searchButton.addEventListener(
+    "click",
+    () => searchCity()
+);
+
+
+
+// ======================================
+// ENTER KEY
+// ======================================
+
+searchInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            searchCity();
+        }
+
+    }
+);
+
+
+
+// ======================================
+// LIVE SUGGESTIONS
+// ======================================
+
+let suggestionTimer;
+
+searchInput.addEventListener(
+    "input",
+    () => {
+
+        clearTimeout(
+            suggestionTimer
+        );
+
+
+        const value =
+            searchInput.value.trim();
+
+
+        if (value.length < 3) {
+
+            suggestions.innerHTML = "";
+
+            return;
+        }
+
+
+        suggestionTimer =
+            setTimeout(
+                () => showSuggestions(value),
+                450
+            );
+
+    }
+);
+
+
+
+async function showSuggestions(value) {
+
+    try {
+
+        const url =
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(value)}&count=6&language=en&format=json&countryCode=US`;
+
+
+        const response =
+            await fetch(url);
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.results) {
+
+            suggestions.innerHTML = "";
+
+            return;
+        }
+
+
+        const places =
+            data.results
+                .filter(
+                    place =>
+                        place.country_code === "US"
+                )
+                .slice(0,5);
+
+
+        suggestions.innerHTML =
+            places
+                .map(
+                    place => `
+
+                        <div
+                            class="suggestion"
+                            data-name="${escapeAttribute(place.name)}"
+                        >
+
+                            📍
+                            ${escapeHTML(place.name)}
+
+                            ${
+                                place.admin1
+                                ? ", " +
+                                  escapeHTML(place.admin1)
+                                : ""
+                            }
+
+                        </div>
+
+                    `
+                )
+                .join("");
+
+
+        document
+            .querySelectorAll(".suggestion")
+            .forEach(item => {
+
+                item.addEventListener(
+                    "click",
+                    () => {
+
+                        const name =
+                            item.dataset.name;
+
+                        searchInput.value =
+                            name;
+
+                        suggestions.innerHTML =
+                            "";
+
+                        searchCity(name);
+
+                    }
+                );
+
+            });
+
+
+    } catch (error) {
+
+        suggestions.innerHTML = "";
+
+    }
+}
+
+
+
+// ======================================
+// EXPLORE USA BUTTON
+// ======================================
+
+exploreButton.addEventListener(
+    "click",
+    () => {
+
+        document
+            .getElementById("cities")
+            .scrollIntoView({
+                behavior: "smooth"
+            });
+
+    }
+);
+
+
+
+// ======================================
+// AI MATCH BUTTON
+// ======================================
+
+matchButton.addEventListener(
+    "click",
+    () => {
+
+        showError(`
+            🤖 <strong>AI City Match</strong>
+            <br><br>
+            Ин қисми USA LIFE ҳоло омода шуда истодааст.
+            <br>
+            Дар версияи навбатӣ мо буҷа,
+            таҳсил, ҳаво ва тарзи зиндагиро истифода мебарем,
+            то шаҳрро барои корбар интихоб кунем. 🚀
+        `);
+
+        document
+            .getElementById("explore")
+            .scrollIntoView({
+                behavior: "smooth"
+            });
+
+    }
+);
+
+
+
+// ======================================
+// HELPERS
+// ======================================
+
+function formatNumber(number) {
+
+    return new Intl.NumberFormat(
+        "en-US"
+    ).format(number);
+
+}
+
+
+function slugify(text) {
+
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+}
+
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function escapeAttribute(text) {
+
+    return escapeHTML(text);
+
+}
