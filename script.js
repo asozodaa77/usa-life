@@ -143,56 +143,192 @@ async function searchCity(cityName = null) {
     ).trim();
 
     if (!value) {
-
         showError("⚠️ Аввал номи шаҳрро навис!");
-
         return;
     }
-
 
     searchButton.disabled = true;
     searchButton.textContent = "Ҷустуҷӯ...";
 
-    showLoading();
-
+    searchResult.innerHTML = `
+        <div class="search-error">
+            🔎 Маълумоти ${escapeHTML(value)}
+            гирифта шуда истодааст...
+        </div>
+    `;
 
     try {
 
-        // ----------------------------------
-        // GEOCODING
-        // ----------------------------------
-
         const geoURL =
-            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(value)}&count=10&language=en&format=json&countryCode=US`;
+            "https://geocoding-api.open-meteo.com/v1/search" +
+            "?name=" + encodeURIComponent(value) +
+            "&count=10" +
+            "&language=en" +
+            "&format=json" +
+            "&countryCode=US";
 
-        const response =
+        const geoResponse =
             await fetch(geoURL);
 
-        if (!response.ok) {
-            throw new Error("Geocoding error");
+        if (!geoResponse.ok) {
+            throw new Error(
+                "Geocoding HTTP error: " +
+                geoResponse.status
+            );
         }
 
-        const data =
-            await response.json();
+        const geoData =
+            await geoResponse.json();
+
+        console.log("CITY SEARCH:", geoData);
 
 
         if (
-            !data.results ||
-            data.results.length === 0
+            !geoData.results ||
+            geoData.results.length === 0
         ) {
 
             showError(`
                 ❌ Шаҳри
                 <strong>${escapeHTML(value)}</strong>
                 ёфт нашуд.
+
                 <br><br>
-                Номи шаҳри ИМА-ро бо забони англисӣ навис.
+
+                Масалан:
+                <strong>New York</strong>,
+                <strong>Miami</strong>,
+                <strong>Chicago</strong>
             `);
 
             return;
         }
 
 
+        // Аввал шаҳрҳои воқеиро интихоб мекунем
+        const city =
+            geoData.results.find(place =>
+                place.country_code === "US" &&
+                place.feature_code &&
+                (
+                    place.feature_code === "PPL" ||
+                    place.feature_code.startsWith("PPL")
+                )
+            ) ||
+            geoData.results.find(place =>
+                place.country_code === "US"
+            );
+
+
+        if (!city) {
+
+            showError(
+                "❌ Шаҳри ИМА ёфт нашуд."
+            );
+
+            return;
+        }
+
+
+        console.log("SELECTED CITY:", city);
+
+
+        // =========================
+        // WEATHER
+        // =========================
+
+        let weatherData = null;
+
+        try {
+
+            const weatherURL =
+                "https://api.open-meteo.com/v1/forecast" +
+                "?latitude=" + city.latitude +
+                "&longitude=" + city.longitude +
+                "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m" +
+                "&timezone=auto";
+
+            const weatherResponse =
+                await fetch(weatherURL);
+
+
+            if (weatherResponse.ok) {
+
+                weatherData =
+                    await weatherResponse.json();
+
+            }
+
+        } catch (weatherError) {
+
+            console.log(
+                "Weather unavailable:",
+                weatherError
+            );
+
+        }
+
+
+        // =========================
+        // WIKIPEDIA
+        // =========================
+
+        let wiki = null;
+
+        try {
+
+            wiki =
+                await getWikipedia(city.name);
+
+        } catch {
+
+            wiki = null;
+
+        }
+
+
+        // =========================
+        // SHOW RESULT
+        // =========================
+
+        displayCity(
+            city,
+            weatherData,
+            wiki
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "SEARCH ERROR:",
+            error
+        );
+
+
+        showError(`
+            ❌ Хатогӣ ҳангоми ҷустуҷӯ.
+
+            <br><br>
+
+            Номи шаҳрро бо англисӣ навис.
+
+            <br><br>
+
+            Масалан:
+            <strong>New York</strong>
+        `);
+
+    } finally {
+
+        searchButton.disabled = false;
+
+        searchButton.textContent =
+            "Ҷустуҷӯ";
+
+    }
+
+}
         const city =
             data.results.find(
                 place =>
