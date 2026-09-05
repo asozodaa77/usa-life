@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tg">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,128 +12,219 @@
 
 <body>
 
-    <header class="navbar">
+<header class="navbar">
 
-        <div class="logo">
-            🇺🇸 USA<span>LIFE</span>
+    <div class="logo">
+        🇺🇸 USA<span>LIFE</span>
+    </div>
+
+    <nav>
+        <a href="#home">Асосӣ</a>
+        <a href="#cities">Шаҳрҳо</a>
+        <a href="#explore">Explore USA</a>
+        <a href="#about">Дар бораи мо</a>
+    </nav>
+
+    <button class="menu-btn">☰</button>
+
+</header>
+
+
+<main>
+
+    <!-- HERO -->
+
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <p class="subtitle">
+                🇺🇸 DISCOVER AMERICA
+            </p>
+
+            <h1>
+                Шаҳри худро дар
+                <span>Амрико</span> ёб.
+            </h1>
+
+            <p class="description">
+                Шаҳрҳои ИМА-ро омӯз, аксҳоро бин,
+                обу ҳаво ва аҳолиро санҷ ва шаҳри мувофиқро пайдо кун.
+            </p>
+
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <span>🔍</span>
+
+                <input
+                    type="text"
+                    id="cityInput"
+                    placeholder="Номи шаҳри ИМА..."
+                    autocomplete="off"
+                >
+
+                <button id="searchButton">
+                    Ҷустуҷӯ
+                </button>
+
+            </div>
+
+
+            <div id="suggestions"></div>
+
+
+            <div class="hero-buttons">
+
+                <button
+                    class="primary-btn"
+                    id="exploreButton">
+                    Explore USA →
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    id="matchButton">
+                    🤖 AI City Match
+                </button>
+
+            </div>
+
         </div>
 
-        <nav>
-            <a href="#">Асосӣ</a>
-            <a href="#">Шаҳрҳо</a>
-            <a href="#">Муқоиса</a>
-            <a href="#">AI Assistant</a>
-        </nav>
-
-        <button class="menu-btn">☰</button>
-
-    </header>
+    </section>
 
 
-    <main>
+    <!-- RESULT -->
 
-        <section class="hero">
+    <section id="explore" class="result-section">
 
-            <div class="hero-content">
+        <div id="searchResult"></div>
 
-                <p class="subtitle">🇺🇸 DISCOVER AMERICA</p>
-
-                <h1>
-                    Шаҳри худро дар
-                    <span>Амрико</span> ёб.
-                </h1>
-
-                <p class="description">
-                    Шаҳрҳои ИМА-ро омӯз, муқоиса кун
-                    ва ҷойеро пайдо кун, ки ба ту мувофиқ аст.
-                </p>
+    </section>
 
 
-                <div class="search-box">
+    <!-- POPULAR CITIES -->
 
-                    <span>🔍</span>
+    <section class="cities" id="cities">
 
-                    <input
-    type="text"
-    id="cityInput"
-    placeholder="Шаҳрро ҷустуҷӯ кун..."
->
+        <div class="section-title">
 
-<button id="searchButton">
-    Ҷустуҷӯ
-</button>
-        
+            <p>POPULAR DESTINATIONS</p>
 
-                </div>
+            <h2>
+                Шаҳрҳои машҳур
+            </h2>
+
+            <span>
+                Барои дидани маълумоти шаҳр пахш кун.
+            </span>
+
+        </div>
 
 
-                <div class="hero-buttons">
+        <div class="city-grid">
 
-                    <button class="primary-btn">
-                        Explore USA →
-                    </button>
 
-                    <button class="secondary-btn">
-                        🤖 AI City Match
-                    </button>
+            <div class="city-card" data-city="New York">
+
+                <div class="city-image new-york"></div>
+
+                <div class="city-info">
+
+                    <h3>
+                        New York 🗽
+                    </h3>
+
+                    <p>
+                        New York, USA
+                    </p>
 
                 </div>
 
             </div>
 
-        </section>
 
+            <div class="city-card" data-city="Miami">
 
-        <section class="cities">
+                <div class="city-image miami"></div>
 
-            <div class="section-title">
-                <p>POPULAR DESTINATIONS</p>
+                <div class="city-info">
 
-                <h2>
-                    Шаҳрҳои машҳур
-                </h2>
-            </div>
+                    <h3>
+                        Miami 🌴
+                    </h3>
 
+                    <p>
+                        Florida, USA
+                    </p>
 
-            <div class="city-grid">
-
-                <div class="city-card">
-                    <div class="city-image new-york"></div>
-
-                    <div class="city-info">
-                        <h3>New York 🗽</h3>
-                        <p>New York, USA</p>
-                    </div>
-                </div>
-
-
-                <div class="city-card">
-                    <div class="city-image miami"></div>
-
-                    <div class="city-info">
-                        <h3>Miami 🌴</h3>
-                        <p>Florida, USA</p>
-                    </div>
-                </div>
-
-
-                <div class="city-card">
-                    <div class="city-image los-angeles"></div>
-
-                    <div class="city-info">
-                        <h3>Los Angeles 🌴</h3>
-                        <p>California, USA</p>
-                    </div>
                 </div>
 
             </div>
 
-        </section>
 
-    </main>
+            <div class="city-card" data-city="Los Angeles">
+
+                <div class="city-image los-angeles"></div>
+
+                <div class="city-info">
+
+                    <h3>
+                        Los Angeles 🎬
+                    </h3>
+
+                    <p>
+                        California, USA
+                    </p>
+
+                </div>
+
+            </div>
 
 
-    <script src="script.js"></script>
+        </div>
+
+    </section>
+
+
+    <!-- ABOUT -->
+
+    <section class="about" id="about">
+
+        <p>USA LIFE</p>
+
+        <h2>
+            Амрикоро аз шаҳр ба шаҳр омӯз. 🇺🇸
+        </h2>
+
+        <span>
+            Ҷустуҷӯ кун → шаҳрро интихоб кун →
+            маълумоти онро омӯз.
+        </span>
+
+    </section>
+
+
+</main>
+
+
+<footer>
+
+    <div>
+        🇺🇸 <strong>USA LIFE</strong>
+    </div>
+
+    <p>
+        Discover America. Find your city.
+    </p>
+
+</footer>
+
+
+<script src="script.js"></script>
 
 </body>
 </html>
