@@ -1052,7 +1052,7 @@ document.addEventListener("DOMContentLoaded", () => {
     applyFilters();
 });
 // --- Gemini AI Chat Logic ---
-const GEMINI_API_KEY = "AQ.Ab8RN6IDhKEMaRMK_R9OTIxUPtxkY1v3JUVQ1tnRdCcmv1BcVg"; 
+const GEMINI_API_KEY = "AQ.Ab8RN6Kbz3v8jPh5SFEfJw6x4kKZ8_v3Q1r1_L-ZL2mSSKn1lg"; 
 
 function toggleChat() {
     const box = document.getElementById('ai-chat-box');
