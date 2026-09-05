@@ -7,6 +7,9 @@
 
     <title>USA LIFE 🇺🇸</title>
 
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,18 +24,27 @@
     <nav>
         <a href="#home">Асосӣ</a>
         <a href="#cities">Шаҳрҳо</a>
-        <a href="#explore">Explore USA</a>
-        <a href="#about">Дар бораи мо</a>
+        <a href="#map">Map</a>
+        <a href="#universities">Education</a>
+        <a href="#jobs">Jobs</a>
     </nav>
 
-    <button class="menu-btn">☰</button>
+    <button class="profile-button" id="profileButton">
+        👤
+    </button>
+
+    <button class="menu-btn" id="menuButton">
+        ☰
+    </button>
 
 </header>
 
 
 <main>
 
-    <!-- HERO -->
+    <!-- =========================
+         HERO
+    ========================== -->
 
     <section class="hero" id="home">
 
@@ -48,12 +60,11 @@
             </h1>
 
             <p class="description">
-                Шаҳрҳои ИМА-ро омӯз, аксҳоро бин,
-                обу ҳаво ва аҳолиро санҷ ва шаҳри мувофиқро пайдо кун.
+                Шаҳрҳои ИМА-ро омӯз, обу ҳаво,
+                аҳолӣ, хароҷот, таҳсил ва имкониятҳои
+                кориро пайдо кун.
             </p>
 
-
-            <!-- SEARCH -->
 
             <div class="search-box">
 
@@ -81,7 +92,7 @@
                 <button
                     class="primary-btn"
                     id="exploreButton">
-                    Explore USA →
+                    🗺️ Explore USA
                 </button>
 
                 <button
@@ -97,7 +108,9 @@
     </section>
 
 
-    <!-- RESULT -->
+    <!-- =========================
+         SEARCH RESULT
+    ========================== -->
 
     <section id="explore" class="result-section">
 
@@ -106,7 +119,385 @@
     </section>
 
 
-    <!-- POPULAR CITIES -->
+    <!-- =========================
+         FILTERS
+    ========================== -->
+
+    <section class="filters-section" id="filters">
+
+        <div class="section-title">
+
+            <p>SMART FILTERS</p>
+
+            <h2>Шаҳрро мувофиқи хоҳиши худ ёб 🔎</h2>
+
+            <span>
+                Шаҳрҳоро аз рӯи минтақа ва шароити зиндагӣ ҷустуҷӯ кун.
+            </span>
+
+        </div>
+
+
+        <div class="filters-box">
+
+            <div class="filter-item">
+
+                <label for="stateFilter">
+                    📍 State
+                </label>
+
+                <select id="stateFilter">
+
+                    <option value="all">
+                        Ҳамаи штатҳо
+                    </option>
+
+                    <option value="California">
+                        California
+                    </option>
+
+                    <option value="Florida">
+                        Florida
+                    </option>
+
+                    <option value="New York">
+                        New York
+                    </option>
+
+                    <option value="Texas">
+                        Texas
+                    </option>
+
+                    <option value="Washington">
+                        Washington
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-item">
+
+                <label for="weatherFilter">
+                    🌤️ Weather
+                </label>
+
+                <select id="weatherFilter">
+
+                    <option value="all">
+                        Ҳама
+                    </option>
+
+                    <option value="warm">
+                        Гарм
+                    </option>
+
+                    <option value="cold">
+                        Сард
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-item">
+
+                <label for="citySizeFilter">
+                    👥 City Size
+                </label>
+
+                <select id="citySizeFilter">
+
+                    <option value="all">
+                        Ҳама
+                    </option>
+
+                    <option value="large">
+                        Шаҳри калон
+                    </option>
+
+                    <option value="medium">
+                        Шаҳри миёна
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                class="filter-button"
+                id="applyFilters">
+
+                🔎 Ҷустуҷӯ
+
+            </button>
+
+        </div>
+
+
+        <div id="filterResults"></div>
+
+    </section>
+
+
+    <!-- =========================
+         USA MAP
+    ========================== -->
+
+    <section class="map-section" id="map">
+
+        <div class="section-title">
+
+            <p>INTERACTIVE MAP</p>
+
+            <h2>Харитаи ИМА 🗺️</h2>
+
+            <span>
+                Ба шаҳрҳо пахш кун ва онҳоро омӯз.
+            </span>
+
+        </div>
+
+
+        <div class="map-wrapper">
+
+            <div id="usaMap"></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         AI CITY MATCH
+    ========================== -->
+
+    <section class="ai-section" id="aiMatch">
+
+        <div class="ai-card">
+
+            <div class="ai-icon">
+                🤖
+            </div>
+
+            <p class="section-label">
+                AI CITY MATCH
+            </p>
+
+            <h2>
+                Кадом шаҳр ба ту мувофиқ аст?
+            </h2>
+
+            <p>
+                Якчанд саволро ҷавоб деҳ ва USA LIFE
+                барои ту шаҳрҳои мувофиқро пешниҳод мекунад.
+            </p>
+
+
+            <div class="ai-form">
+
+                <div class="ai-question">
+
+                    <label>
+                        🌡️ Кадом ҳаворо дӯст медорӣ?
+                    </label>
+
+                    <select id="aiWeather">
+
+                        <option value="warm">
+                            Гарм
+                        </option>
+
+                        <option value="cool">
+                            Муътадил
+                        </option>
+
+                        <option value="cold">
+                            Сард
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="ai-question">
+
+                    <label>
+                        💰 Барои зиндагӣ чӣ қадар буҷа дорӣ?
+                    </label>
+
+                    <select id="aiBudget">
+
+                        <option value="low">
+                            Кам
+                        </option>
+
+                        <option value="medium">
+                            Миёна
+                        </option>
+
+                        <option value="high">
+                            Баланд
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="ai-question">
+
+                    <label>
+                        🎓 Ҳадафи асосӣ чист?
+                    </label>
+
+                    <select id="aiGoal">
+
+                        <option value="study">
+                            Таҳсил
+                        </option>
+
+                        <option value="job">
+                            Кор
+                        </option>
+
+                        <option value="life">
+                            Зиндагӣ
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="ai-button"
+                id="findMyCity">
+
+                🤖 Find My City
+
+            </button>
+
+
+            <div id="aiResult"></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         UNIVERSITIES
+    ========================== -->
+
+    <section class="education-section" id="universities">
+
+        <div class="section-title">
+
+            <p>EDUCATION</p>
+
+            <h2>🎓 Universities</h2>
+
+            <span>
+                Барои таҳсил шаҳр ва донишгоҳҳои мувофиқро пайдо кун.
+            </span>
+
+        </div>
+
+
+        <div class="education-grid">
+
+            <div class="education-card">
+
+                <div class="education-icon">
+                    🎓
+                </div>
+
+                <h3>
+                    Universities
+                </h3>
+
+                <p>
+                    Донишгоҳҳои маъруфи шаҳрҳои ИМА-ро омӯз.
+                </p>
+
+                <button
+                    class="card-button"
+                    data-education="universities">
+
+                    View Universities →
+
+                </button>
+
+            </div>
+
+
+            <div class="education-card">
+
+                <div class="education-icon">
+                    📚
+                </div>
+
+                <h3>
+                    Study Options
+                </h3>
+
+                <p>
+                    Барои таҳсил шаҳр ва имкониятҳои мувофиқро интихоб кун.
+                </p>
+
+                <button
+                    class="card-button"
+                    data-education="study">
+
+                    Explore Study →
+
+                </button>
+
+            </div>
+
+
+            <div class="education-card">
+
+                <div class="education-icon">
+                    💼
+                </div>
+
+                <h3>
+                    Jobs
+                </h3>
+
+                <p>
+                    Бозори кор ва соҳаҳои машҳури шаҳрҳоро омӯз.
+                </p>
+
+                <button
+                    class="card-button"
+                    data-education="jobs">
+
+                    Explore Jobs →
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div id="educationResult"></div>
+
+    </section>
+
+
+    <!-- =========================
+         POPULAR CITIES
+    ========================== -->
 
     <section class="cities" id="cities">
 
@@ -115,7 +506,7 @@
             <p>POPULAR DESTINATIONS</p>
 
             <h2>
-                Шаҳрҳои машҳур
+                Шаҳрҳои машҳур 🇺🇸
             </h2>
 
             <span>
@@ -128,7 +519,9 @@
         <div class="city-grid">
 
 
-            <div class="city-card" data-city="New York">
+            <div
+                class="city-card"
+                data-city="New York">
 
                 <div class="city-image new-york"></div>
 
@@ -147,7 +540,9 @@
             </div>
 
 
-            <div class="city-card" data-city="Miami">
+            <div
+                class="city-card"
+                data-city="Miami">
 
                 <div class="city-image miami"></div>
 
@@ -166,7 +561,9 @@
             </div>
 
 
-            <div class="city-card" data-city="Los Angeles">
+            <div
+                class="city-card"
+                data-city="Los Angeles">
 
                 <div class="city-image los-angeles"></div>
 
@@ -184,13 +581,71 @@
 
             </div>
 
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         PROFILE
+    ========================== -->
+
+    <section class="profile-section" id="profile">
+
+        <div class="profile-card">
+
+            <div class="profile-avatar">
+                👤
+            </div>
+
+            <p class="section-label">
+                YOUR PROFILE
+            </p>
+
+            <h2>
+                Профили USA LIFE
+            </h2>
+
+            <p>
+                Шаҳрҳои дӯстдоштаатро нигоҳ дор
+                ва таҷрибаи худро шахсӣ кун.
+            </p>
+
+
+            <div class="profile-form">
+
+                <input
+                    type="text"
+                    id="profileName"
+                    placeholder="Номи ту">
+
+                <input
+                    type="text"
+                    id="favoriteCity"
+                    placeholder="Шаҳри дӯстдошта">
+
+            </div>
+
+
+            <button
+                class="profile-save"
+                id="saveProfile">
+
+                💾 Save Profile
+
+            </button>
+
+
+            <div id="profileResult"></div>
 
         </div>
 
     </section>
 
 
-    <!-- ABOUT -->
+    <!-- =========================
+         ABOUT
+    ========================== -->
 
     <section class="about" id="about">
 
@@ -206,7 +661,6 @@
         </span>
 
     </section>
-
 
 </main>
 
@@ -224,7 +678,51 @@
 </footer>
 
 
+<!-- =========================
+     PROFILE MODAL
+========================= -->
+
+<div
+    class="modal"
+    id="profileModal">
+
+    <div class="modal-content">
+
+        <button
+            class="modal-close"
+            id="closeProfile">
+            ×
+        </button>
+
+        <div class="profile-avatar">
+            👤
+        </div>
+
+        <h2>
+            User Profile
+        </h2>
+
+        <p>
+            Профили худро дар USA LIFE соз.
+        </p>
+
+        <button
+            class="profile-save"
+            id="modalProfileButton">
+
+            Create Profile
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="script.js"></script>
 
 </body>
+
 </html>
