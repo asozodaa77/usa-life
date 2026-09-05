@@ -26,53 +26,62 @@ database.ref('cities').on('value', (snapshot) => {
             name: key,
             ...data[key]
         }));
-        console.log("Cities loaded successfully:", citiesData);
-        displayCities(citiesData); // Намоиши шаҳрҳо ҳангоми боргирӣ
+        console.log("Cities loaded:", citiesData);
+        displayCities(citiesData);
     } else {
-        console.log("No data found in Firebase.");
+        console.log("No data in database.");
+        displayCities([]);
     }
 });
 
-// Function to Display Cities
+// Display Function with dynamic fallbacks
 function displayCities(cities) {
-    const container = document.getElementById('resultsContainer') || document.getElementById('citiesList');
+    // Яке аз контейнерҳои мавҷударо пайдо мекунад
+    const container = document.getElementById('resultsContainer') || 
+                      document.getElementById('citiesList') || 
+                      document.querySelector('.cities-grid') ||
+                      document.querySelector('.cards-container');
+
     if (!container) return;
 
     container.innerHTML = '';
 
     if (cities.length === 0) {
-        container.innerHTML = '<p style="color: #aaa; text-align: center;">Ҳеҷ шаҳре пайдо нашуд.</p>';
+        container.innerHTML = '<p style="color: #aaa; text-align: center; width: 100%;">Ҳеҷ шаҳре пайдо нашуд.</p>';
         return;
     }
 
     cities.forEach(city => {
         const card = document.createElement('div');
         card.className = 'city-card';
-        card.style.cssText = "background: #161b22; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #30363d; color: #fff;";
+        card.style.cssText = "background: #161b22; padding: 20px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; color: #fff;";
         
+        const unis = Array.isArray(city.universities) ? city.universities.join(', ') : (city.universities || 'N/A');
+        const jobs = Array.isArray(city.jobs) ? city.jobs.join(', ') : (city.jobs || 'N/A');
+
         card.innerHTML = `
-            <h3>🏙️ ${city.name} (${city.state || ''})</h3>
+            <h3 style="color: #58a6ff; margin-top: 0;">🏙️ ${city.name} (${city.state || ''})</h3>
             <p><strong>Об-ҳаво:</strong> ${city.weather || 'N/A'}</p>
             <p><strong>Андоза:</strong> ${city.size || 'N/A'}</p>
             <p><strong>Бюҷет:</strong> ${city.budget || 'N/A'}</p>
-            <p><strong>Донишгоҳҳо:</strong> ${Array.isArray(city.universities) ? city.universities.join(', ') : city.universities || 'N/A'}</p>
-            <p><strong>Соҳаҳои кор:</strong> ${Array.isArray(city.jobs) ? city.jobs.join(', ') : city.jobs || 'N/A'}</p>
+            <p><strong>Донишгоҳҳо:</strong> ${unis}</p>
+            <p><strong>Соҳаҳои кор:</strong> ${jobs}</p>
         `;
         container.appendChild(card);
     });
 }
 
-// Search Functionality
-const searchInput = document.getElementById('searchInput') || document.getElementById('citySearch');
-if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
+// Global Event Listener for Search
+document.addEventListener('input', (e) => {
+    if (e.target && (e.target.id === 'searchInput' || e.target.id === 'citySearch' || e.target.type === 'search' || e.target.placeholder.toLowerCase().includes('search') || e.target.placeholder.toLowerCase().includes('ҷустуҷӯ'))) {
         const searchTerm = e.target.value.toLowerCase().trim();
         
         const filteredCities = citiesData.filter(city => {
-            return city.name.toLowerCase().includes(searchTerm) || 
-                   (city.state && city.state.toLowerCase().includes(searchTerm));
+            const nameMatch = city.name && city.name.toLowerCase().includes(searchTerm);
+            const stateMatch = city.state && city.state.toLowerCase().includes(searchTerm);
+            return nameMatch || stateMatch;
         });
 
         displayCities(filteredCities);
-    });
-}
+    }
+});
