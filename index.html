@@ -722,24 +722,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script src="script.js"></script>
-<!-- Gemini AI Chat UI -->
-<div id="ai-chat-btn" onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; background: #238636; color: white; padding: 15px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000;">
-    🤖 Чат бо AI
-</div>
 
-<div id="ai-chat-box" style="display: none; position: fixed; bottom: 80px; right: 20px; width: 320px; height: 420px; background: #161b22; border: 1px solid #30363d; border-radius: 12px; flex-direction: column; overflow: hidden; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-    <div style="background: #21262d; padding: 12px; color: white; font-weight: bold; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between;">
-        <span>USA Life AI Assistant</span>
-        <span onclick="toggleChat()" style="cursor: pointer;">✖</span>
-    </div>
-    <div id="chat-messages" style="flex: 1; padding: 10px; overflow-y: auto; color: white; font-size: 14px;">
-        <p style="color: #8b949e; margin: 0;">Салом! Ман ёрдамчии сунъии USA Life ҳастам. Дар бораи кадом шаҳр ё донишгоҳ савол дорӣ?</p>
-    </div>
-    <div style="padding: 10px; border-top: 1px solid #30363d; display: flex; gap: 5px;">
-        <input type="text" id="chat-input" placeholder="Саволи худро навис..." style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; outline: none;">
-        <button onclick="sendGeminiMessage()" style="background: #238636; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">➡️</button>
-    </div>
-</div>
 <script>
 (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="Iy6MGyF-fy4k08PpnjFDF";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
 </script>
