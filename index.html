@@ -13,12 +13,15 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
+    <!-- AOS CSS Animation -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="navbar">
+<header class="navbar" data-aos="fade-down">
 
     <div class="logo">
         <span class="logo-mark">🇺🇸</span> USA<span>LIFE</span>
@@ -32,7 +35,7 @@
         <a href="#aiMatch">AI Match</a>
     </nav>
 
-    <button class="profile-button" id="profileButton" aria-label="Профил">
+    <button class="profile-button" id="profileButton" aria-label="Профил" data-aos="zoom-in" data-aos-delay="200">
         👤
     </button>
 
@@ -51,7 +54,7 @@
 
     <section class="hero" id="home">
 
-        <div class="hero-map" aria-hidden="true">
+        <div class="hero-map" aria-hidden="true" data-aos="fade-in">
             <svg viewBox="0 0 600 380" class="route-svg">
                 <path class="route-dot" d="M 90 260 Q 220 60 340 120 T 520 90" />
                 <circle class="route-pin" cx="90" cy="260" r="5" />
@@ -60,21 +63,21 @@
             </svg>
         </div>
 
-        <div class="hero-content">
+        <div class="hero-content" data-aos="fade-up">
 
-            <p class="stamp">🇺🇸 Discover America</p>
+            <p class="stamp" data-aos="zoom-in" data-aos-delay="100">🇺🇸 Discover America</p>
 
-            <h1>
+            <h1 data-aos="fade-up" data-aos-delay="200">
                 Шаҳри худро дар <span>Амрико</span> ёб
             </h1>
 
-            <p class="description">
+            <p class="description" data-aos="fade-up" data-aos-delay="300">
                 Шаҳрҳои ИМА-ро омӯз: обу ҳаво, аҳолӣ, хароҷот,
                 таҳсил ва имкониятҳои кориро дар як ҷо пайдо кун.
             </p>
 
 
-            <div class="search-box">
+            <div class="search-box" data-aos="zoom-in" data-aos-delay="400">
 
                 <span>🔍</span>
 
@@ -85,7 +88,7 @@
                     autocomplete="off"
                 >
 
-                <button id="searchButton">
+                <button id="searchButton" data-aos="zoom-in" data-aos-delay="500">
                     Ҷустуҷӯ
                 </button>
 
@@ -95,7 +98,7 @@
             <div id="suggestions"></div>
 
 
-            <div class="hero-buttons">
+            <div class="hero-buttons" data-aos="fade-up" data-aos-delay="600">
 
                 <button
                     class="primary-btn"
@@ -120,7 +123,7 @@
          SEARCH RESULT
     ========================== -->
 
-    <section id="explore" class="result-section">
+    <section id="explore" class="result-section" data-aos="fade-up">
 
         <div id="searchResult"></div>
 
@@ -131,7 +134,7 @@
          FILTERS
     ========================== -->
 
-    <section class="filters-section" id="filters">
+    <section class="filters-section" id="filters" data-aos="fade-up">
 
         <div class="section-title">
 
@@ -146,7 +149,7 @@
         </div>
 
 
-        <div class="filters-box">
+        <div class="filters-box" data-aos="zoom-in">
 
             <div class="filter-item">
 
@@ -205,7 +208,9 @@
 
             <button
                 class="filter-button"
-                id="applyFilters">
+                id="applyFilters"
+                data-aos="zoom-in"
+                data-aos-delay="200">
 
                 🔎 Ҷустуҷӯ
 
@@ -223,7 +228,7 @@
          USA MAP
     ========================== -->
 
-    <section class="map-section" id="map">
+    <section class="map-section" id="map" data-aos="fade-up">
 
         <div class="section-title">
 
@@ -238,7 +243,7 @@
         </div>
 
 
-        <div class="map-wrapper">
+        <div class="map-wrapper" data-aos="zoom-in">
 
             <div id="usaMap"></div>
 
@@ -251,11 +256,11 @@
          AI CITY MATCH
     ========================== -->
 
-    <section class="ai-section" id="aiMatch">
+    <section class="ai-section" id="aiMatch" data-aos="fade-up">
 
-        <div class="ai-card">
+        <div class="ai-card" data-aos="flip-up">
 
-            <div class="ai-icon">
+            <div class="ai-icon" data-aos="zoom-in" data-aos-delay="200">
                 🤖
             </div>
 
@@ -322,7 +327,9 @@
 
             <button
                 class="ai-button"
-                id="findMyCity">
+                id="findMyCity"
+                data-aos="zoom-in"
+                data-aos-delay="300">
 
                 🤖 Find My City
 
@@ -340,7 +347,7 @@
          UNIVERSITIES
     ========================== -->
 
-    <section class="education-section" id="universities">
+    <section class="education-section" id="universities" data-aos="fade-up">
 
         <div class="section-title">
 
@@ -357,7 +364,7 @@
 
         <div class="education-grid">
 
-            <div class="education-card">
+            <div class="education-card" data-aos="fade-up" data-aos-delay="100">
 
                 <div class="education-icon">🎓</div>
 
@@ -372,7 +379,7 @@
             </div>
 
 
-            <div class="education-card">
+            <div class="education-card" data-aos="fade-up" data-aos-delay="200">
 
                 <div class="education-icon">📚</div>
 
@@ -387,7 +394,7 @@
             </div>
 
 
-            <div class="education-card">
+            <div class="education-card" data-aos="fade-up" data-aos-delay="300">
 
                 <div class="education-icon">💼</div>
 
@@ -413,7 +420,7 @@
          POPULAR CITIES
     ========================== -->
 
-    <section class="cities" id="cities">
+    <section class="cities" id="cities" data-aos="fade-up">
 
         <div class="section-title">
 
@@ -430,7 +437,7 @@
 
         <div class="city-grid">
 
-            <div class="city-card" data-city="New York" data-tilt>
+            <div class="city-card" data-city="New York" data-tilt data-aos="zoom-in" data-aos-delay="100">
                 <div class="city-image new-york"></div>
                 <div class="city-info">
                     <h3>New York 🗽</h3>
@@ -439,7 +446,7 @@
             </div>
 
 
-            <div class="city-card" data-city="Miami" data-tilt>
+            <div class="city-card" data-city="Miami" data-tilt data-aos="zoom-in" data-aos-delay="200">
                 <div class="city-image miami"></div>
                 <div class="city-info">
                     <h3>Miami 🌴</h3>
@@ -448,7 +455,7 @@
             </div>
 
 
-            <div class="city-card" data-city="Los Angeles" data-tilt>
+            <div class="city-card" data-city="Los Angeles" data-tilt data-aos="zoom-in" data-aos-delay="300">
                 <div class="city-image los-angeles"></div>
                 <div class="city-info">
                     <h3>Los Angeles 🎬</h3>
@@ -456,7 +463,7 @@
                 </div>
             </div>
 
-            <div class="city-card" data-city="Chicago" data-tilt>
+            <div class="city-card" data-city="Chicago" data-tilt data-aos="zoom-in" data-aos-delay="100">
                 <div class="city-image chicago"></div>
                 <div class="city-info">
                     <h3>Chicago 🌆</h3>
@@ -464,7 +471,7 @@
                 </div>
             </div>
 
-            <div class="city-card" data-city="Austin" data-tilt>
+            <div class="city-card" data-city="Austin" data-tilt data-aos="zoom-in" data-aos-delay="200">
                 <div class="city-image austin"></div>
                 <div class="city-info">
                     <h3>Austin 🎸</h3>
@@ -472,7 +479,7 @@
                 </div>
             </div>
 
-            <div class="city-card" data-city="Seattle" data-tilt>
+            <div class="city-card" data-city="Seattle" data-tilt data-aos="zoom-in" data-aos-delay="300">
                 <div class="city-image seattle"></div>
                 <div class="city-info">
                     <h3>Seattle ☕</h3>
@@ -489,9 +496,9 @@
          PROFILE
     ========================== -->
 
-    <section class="profile-section" id="profile">
+    <section class="profile-section" id="profile" data-aos="fade-up">
 
-        <div class="profile-card">
+        <div class="profile-card" data-aos="zoom-in">
 
             <div class="profile-avatar">👤</div>
 
@@ -513,7 +520,7 @@
             </div>
 
 
-            <button class="profile-save" id="saveProfile">
+            <button class="profile-save" id="saveProfile" data-aos="zoom-in">
                 💾 Save Profile
             </button>
 
@@ -529,7 +536,7 @@
          ABOUT
     ========================== -->
 
-    <section class="about" id="about">
+    <section class="about" id="about" data-aos="fade-up">
 
         <p class="eyebrow">USA LIFE</p>
 
@@ -560,7 +567,7 @@
 
 <div class="modal" id="profileModal">
 
-    <div class="modal-content">
+    <div class="modal-content" data-aos="zoom-in">
 
         <button class="modal-close" id="closeProfile" aria-label="Пӯшидан">×</button>
 
@@ -580,6 +587,15 @@
 
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- AOS Script & Initialization -->
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 800, // Суръати аниматсия (0.8 сония)
+    once: true     // Танҳо як бор ҳангоми скролл иҷро шавад
+  });
+</script>
 
 <script src="script.js"></script>
 <script>
